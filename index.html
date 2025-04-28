@@ -1,1 +1,625 @@
+from IPython.display import HTML, display
 
+# Uygulama kodunu bir stringe atayın
+html_code = """
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTP Boru Sayım Uygulaması</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-color: #5D5CDE;
+            --primary-hover: #4A49B8;
+        }
+        .dark {
+            color-scheme: dark;
+        }
+        .count-cell:hover {
+            background-color: rgba(93, 92, 222, 0.1);
+        }
+        .dark .count-cell:hover {
+            background-color: rgba(93, 92, 222, 0.2);
+        }
+        .count-cell.highlight {
+            background-color: rgba(5, 150, 105, 0.2);
+        }
+        .dark .count-cell.highlight {
+            background-color: rgba(5, 150, 105, 0.3);
+        }
+        .keyboard-key {
+            min-width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        @media (max-width: 640px) {
+            .table-responsive {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen">
+    <div class="container mx-auto px-4 py-6">
+        <h1 class="text-2xl md:text-3xl font-bold text-center mb-6">CTP Boru Sayım Uygulaması</h1>
+        
+        <div class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="mb-4">
+                <h2 class="text-xl font-semibold mb-2">Özel Uzunluk Ekle</h2>
+                <div class="flex flex-wrap gap-2">
+                    <input type="number" id="customLength" min="0.1" step="0.1" placeholder="Metre cinsinden uzunluk" 
+                           class="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md flex-grow text-base">
+                    <button id="addCustomLength" 
+                            class="px-4 py-2 bg-[#5D5CDE] hover:bg-[#4A49B8] text-white rounded-md">
+                        Ekle
+                    </button>
+                    <button id="resetAll" 
+                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md">
+                        Sayımı Sıfırla
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold mb-3">Hızlı Sayım Butonları</h2>
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <h3 class="font-medium mb-2">3 metre borular:</h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <button class="quick-count-btn bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 p-3 rounded-lg text-center" data-diameter="1400" data-length="3">
+                                <div class="font-bold">1400 mm</div>
+                                <div class="text-sm">3 metre</div>
+                            </button>
+                            <button class="quick-count-btn bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 p-3 rounded-lg text-center" data-diameter="1600" data-length="3">
+                                <div class="font-bold">1600 mm</div>
+                                <div class="text-sm">3 metre</div>
+                            </button>
+                            <button class="quick-count-btn bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 p-3 rounded-lg text-center" data-diameter="1800" data-length="3">
+                                <div class="font-bold">1800 mm</div>
+                                <div class="text-sm">3 metre</div>
+                            </button>
+                            <button class="quick-count-btn bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 p-3 rounded-lg text-center" data-diameter="2000" data-length="3">
+                                <div class="font-bold">2000 mm</div>
+                                <div class="text-sm">3 metre</div>
+                            </button>
+                            <button class="quick-count-btn bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 p-3 rounded-lg text-center" data-diameter="2200" data-length="3">
+                                <div class="font-bold">2200 mm</div>
+                                <div class="text-sm">3 metre</div>
+                            </button>
+                            <button class="quick-count-btn bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 p-3 rounded-lg text-center" data-diameter="2400" data-length="3">
+                                <div class="font-bold">2400 mm</div>
+                                <div class="text-sm">3 metre</div>
+                            </button>
+                            <button class="quick-count-btn bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 p-3 rounded-lg text-center" data-diameter="2600" data-length="3">
+                                <div class="font-bold">2600 mm</div>
+                                <div class="text-sm">3 metre</div>
+                            </button>
+                            <button class="quick-count-btn bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 p-3 rounded-lg text-center" data-diameter="2800" data-length="3">
+                                <div class="font-bold">2800 mm</div>
+                                <div class="text-sm">3 metre</div>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-medium mb-2">6 metre borular:</h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <button class="quick-count-btn bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:hover:bg-green-800 p-3 rounded-lg text-center" data-diameter="1400" data-length="6">
+                                <div class="font-bold">1400 mm</div>
+                                <div class="text-sm">6 metre</div>
+                            </button>
+                            <button class="quick-count-btn bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:hover:bg-green-800 p-3 rounded-lg text-center" data-diameter="1600" data-length="6">
+                                <div class="font-bold">1600 mm</div>
+                                <div class="text-sm">6 metre</div>
+                            </button>
+                            <button class="quick-count-btn bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:hover:bg-green-800 p-3 rounded-lg text-center" data-diameter="1800" data-length="6">
+                                <div class="font-bold">1800 mm</div>
+                                <div class="text-sm">6 metre</div>
+                            </button>
+                            <button class="quick-count-btn bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:hover:bg-green-800 p-3 rounded-lg text-center" data-diameter="2000" data-length="6">
+                                <div class="font-bold">2000 mm</div>
+                                <div class="text-sm">6 metre</div>
+                            </button>
+                            <button class="quick-count-btn bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:hover:bg-green-800 p-3 rounded-lg text-center" data-diameter="2200" data-length="6">
+                                <div class="font-bold">2200 mm</div>
+                                <div class="text-sm">6 metre</div>
+                            </button>
+                            <button class="quick-count-btn bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:hover:bg-green-800 p-3 rounded-lg text-center" data-diameter="2400" data-length="6">
+                                <div class="font-bold">2400 mm</div>
+                                <div class="text-sm">6 metre</div>
+                            </button>
+                            <button class="quick-count-btn bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:hover:bg-green-800 p-3 rounded-lg text-center" data-diameter="2600" data-length="6">
+                                <div class="font-bold">2600 mm</div>
+                                <div class="text-sm">6 metre</div>
+                            </button>
+                            <button class="quick-count-btn bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:hover:bg-green-800 p-3 rounded-lg text-center" data-diameter="2800" data-length="6">
+                                <div class="font-bold">2800 mm</div>
+                                <div class="text-sm">6 metre</div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-2">
+                <h2 class="text-xl font-semibold mb-2">Klavye Kısayolları</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h3 class="font-medium mb-1">3 metre borular:</h3>
+                        <div class="flex flex-wrap gap-2 text-sm">
+                            <span class="keyboard-key bg-gray-200 dark:bg-gray-700 rounded px-2">1</span> 1400mm
+                            <span class="keyboard-key bg-gray-200 dark:bg-gray-700 rounded px-2">2</span> 1600mm
+                            <span class="keyboard-key bg-gray-200 dark:bg-gray-700 rounded px-2">3</span> 1800mm
+                            <span class="keyboard-key bg-gray-200 dark:bg-gray-700 rounded px-2">4</span> 2000mm
+                            <span class="keyboard-key bg-gray-200 dark:bg-gray-700 rounded px-2">5</span> 2200mm
+                            <span class="keyboard-key bg-gray-200 dark:bg-gray-700 rounded px-2">6</span> 2400mm
+                            <span class="keyboard-key bg-gray-200 dark:bg-gray-700 rounded px-2">7</span> 2600mm
+                            <span class="keyboard-key bg-gray-200 dark:bg-gray-700 rounded px-2">8</span> 2800mm
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-medium mb-1">6 metre borular:</h3>
+                        <div class="flex flex-wrap gap-2 text-sm">
+                            <span class="keyboard-key bg-gray-200 dark:bg-gray-700 rounded px-2">Q</span> 1400mm
+                            <span class="keyboard-key bg-gray-200 dark:bg-gray-700 rounded px-2">W</span> 1600mm
+                            <span class="keyboard-key bg-gray-200 dark:bg-gray-700 rounded px-2">E</span> 1800mm
+                            <span class="keyboard-key bg-gray-200 dark:bg-gray-700 rounded px-2">R</span> 2000mm
+                            <span class="keyboard-key bg-gray-200 dark:bg-gray-700 rounded px-2">T</span> 2200mm
+                            <span class="keyboard-key bg-gray-200 dark:bg-gray-700 rounded px-2">Y</span> 2400mm
+                            <span class="keyboard-key bg-gray-200 dark:bg-gray-700 rounded px-2">U</span> 2600mm
+                            <span class="keyboard-key bg-gray-200 dark:bg-gray-700 rounded px-2">I</span> 2800mm
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="notification" class="mt-2 p-2 rounded-md hidden"></div>
+        </div>
+
+        <div class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="flex flex-wrap justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Boru Sayım Tablosu</h2>
+                <div>
+                    <button id="copyButton" class="px-4 py-2 bg-[#5D5CDE] hover:bg-[#4A49B8] text-white rounded-md">
+                        Tabloyu Kopyala
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="w-full border-collapse" id="pipeTable">
+                    <thead>
+                        <tr>
+                            <th class="border dark:border-gray-600 px-3 py-2 bg-gray-100 dark:bg-gray-700 text-left">Çap (mm)</th>
+                            <th class="border dark:border-gray-600 px-3 py-2 bg-gray-100 dark:bg-gray-700 text-center">3 metre</th>
+                            <th class="border dark:border-gray-600 px-3 py-2 bg-gray-100 dark:bg-gray-700 text-center">6 metre</th>
+                            <!-- Özel uzunluklar dinamik olarak eklenecek -->
+                        </tr>
+                    </thead>
+                    <tbody id="pipeTableBody">
+                        <!-- JavaScript ile doldurulacak -->
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td class="border dark:border-gray-600 px-3 py-2 font-medium">Toplam</td>
+                            <td class="border dark:border-gray-600 px-3 py-2 text-center" id="total3m">0</td>
+                            <td class="border dark:border-gray-600 px-3 py-2 text-center" id="total6m">0</td>
+                            <!-- Özel uzunlukların toplamları JavaScript ile doldurulacak -->
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                <h3 class="font-medium mb-2">Toplam Boru Adedi</h3>
+                <p class="text-2xl font-bold" id="totalCount">0</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                <h3 class="font-medium mb-2">Toplam Uzunluk (m)</h3>
+                <p class="text-2xl font-bold" id="totalLength">0</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                <h3 class="font-medium mb-2">Özel Uzunluklu Borular</h3>
+                <p class="text-2xl font-bold" id="totalCustom">0</p>
+            </div>
+        </div>
+
+        <div id="copyArea" class="mt-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow hidden">
+            <h3 class="font-medium mb-2">Kopyalanacak Veri:</h3>
+            <textarea id="copyTextarea" class="w-full h-40 p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md font-mono text-sm" readonly></textarea>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                Bu verileri manuel olarak kopyalayıp Excel'e yapıştırabilirsiniz.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Karanlık Mod
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        // Ana Uygulama
+        document.addEventListener('DOMContentLoaded', function() {
+            // Uygulama verileri
+            const diameters = [1400, 1600, 1800, 2000, 2200, 2400, 2600, 2800];
+            const standardLengths = [3, 6];
+            let customLengths = [];
+            let pipeCounts = {};
+
+            // DOM Elementleri
+            const pipeTableBody = document.getElementById('pipeTableBody');
+            const customLengthInput = document.getElementById('customLength');
+            const notification = document.getElementById('notification');
+            const copyTextarea = document.getElementById('copyTextarea');
+            const copyArea = document.getElementById('copyArea');
+
+            // Sayaç verisini başlat
+            function initializeCounts() {
+                pipeCounts = {};
+                diameters.forEach(diameter => {
+                    pipeCounts[diameter] = {};
+                    standardLengths.forEach(length => {
+                        pipeCounts[diameter][length] = 0;
+                    });
+                    customLengths.forEach(length => {
+                        pipeCounts[diameter][length] = 0;
+                    });
+                });
+            }
+
+            // Tabloyu oluştur
+            function renderTable() {
+                // Tablo başlığını güncelle - özel uzunluklar için
+                updateTableHeader();
+                
+                // Tablo gövdesini temizle ve yeniden oluştur
+                pipeTableBody.innerHTML = '';
+                
+                diameters.forEach(diameter => {
+                    const row = document.createElement('tr');
+                    
+                    // Çap hücresi
+                    const diameterCell = document.createElement('td');
+                    diameterCell.className = 'border dark:border-gray-600 px-3 py-2 font-medium';
+                    diameterCell.textContent = diameter;
+                    row.appendChild(diameterCell);
+                    
+                    // Standart uzunluklar
+                    standardLengths.forEach(length => {
+                        const cell = createCountCell(diameter, length);
+                        row.appendChild(cell);
+                    });
+                    
+                    // Özel uzunluklar
+                    customLengths.forEach(length => {
+                        const cell = createCountCell(diameter, length);
+                        row.appendChild(cell);
+                    });
+                    
+                    pipeTableBody.appendChild(row);
+                });
+                
+                updateTableFooter();
+                updateTotals();
+            }
+            
+            // Tablo başlığını güncelle (özel uzunluklar için)
+            function updateTableHeader() {
+                const headerRow = document.querySelector('#pipeTable thead tr');
+                
+                // Mevcut özel uzunluk başlıklarını temizle
+                while (headerRow.children.length > standardLengths.length + 1) {
+                    headerRow.removeChild(headerRow.lastChild);
+                }
+                
+                // Özel uzunluk başlıklarını ekle
+                customLengths.forEach(length => {
+                    const th = document.createElement('th');
+                    th.className = 'border dark:border-gray-600 px-3 py-2 bg-gray-100 dark:bg-gray-700 text-center';
+                    th.textContent = `${length} metre`;
+                    headerRow.appendChild(th);
+                });
+            }
+            
+            // Tablo altbilgisini güncelle (toplamlar için)
+            function updateTableFooter() {
+                const footerRow = document.querySelector('#pipeTable tfoot tr');
+                
+                // Özel uzunluk toplamları temizle
+                while (footerRow.children.length > standardLengths.length + 1) {
+                    footerRow.removeChild(footerRow.lastChild);
+                }
+                
+                // Özel uzunluk toplamlarını ekle
+                customLengths.forEach((length, index) => {
+                    const td = document.createElement('td');
+                    td.className = 'border dark:border-gray-600 px-3 py-2 text-center';
+                    td.id = `total${length}m`;
+                    td.textContent = '0';
+                    footerRow.appendChild(td);
+                });
+            }
+            
+            // Sayım hücresi oluştur
+            function createCountCell(diameter, length) {
+                const cell = document.createElement('td');
+                cell.className = 'border dark:border-gray-600 px-3 py-2 text-center count-cell cursor-pointer';
+                cell.dataset.diameter = diameter;
+                cell.dataset.length = length;
+                cell.textContent = pipeCounts[diameter][length] || 0;
+                
+                // Tıklama ile sayımı artır
+                cell.addEventListener('click', () => {
+                    incrementCount(diameter, length);
+                });
+                
+                return cell;
+            }
+            
+            // Sayımı artır
+            function incrementCount(diameter, length) {
+                if (!pipeCounts[diameter]) {
+                    pipeCounts[diameter] = {};
+                }
+                
+                if (!pipeCounts[diameter][length]) {
+                    pipeCounts[diameter][length] = 0;
+                }
+                
+                pipeCounts[diameter][length]++;
+                
+                // İlgili hücreyi güncelle
+                const cell = document.querySelector(`td[data-diameter="${diameter}"][data-length="${length}"]`);
+                if (cell) {
+                    cell.textContent = pipeCounts[diameter][length];
+                    
+                    // Vurgu efekti
+                    cell.classList.add('highlight');
+                    setTimeout(() => {
+                        cell.classList.remove('highlight');
+                    }, 300);
+                }
+                
+                updateTotals();
+            }
+            
+            // Toplamları güncelle
+            function updateTotals() {
+                let totalCount = 0;
+                let totalLength = 0;
+                let totalCustomPipes = 0;
+                
+                // Her uzunluk için sütun toplamlarını hesapla
+                const columnTotals = {};
+                standardLengths.forEach(length => {
+                    columnTotals[length] = 0;
+                });
+                customLengths.forEach(length => {
+                    columnTotals[length] = 0;
+                });
+                
+                // Tüm sayıları topla
+                diameters.forEach(diameter => {
+                    Object.keys(pipeCounts[diameter]).forEach(length => {
+                        const lengthValue = parseFloat(length);
+                        const count = pipeCounts[diameter][length];
+                        
+                        totalCount += count;
+                        totalLength += count * lengthValue;
+                        columnTotals[lengthValue] += count;
+                        
+                        if (!standardLengths.includes(lengthValue)) {
+                            totalCustomPipes += count;
+                        }
+                    });
+                });
+                
+                // Toplam değerleri güncelle
+                document.getElementById('totalCount').textContent = totalCount;
+                document.getElementById('totalLength').textContent = totalLength.toFixed(1);
+                document.getElementById('totalCustom').textContent = totalCustomPipes;
+                
+                // Sütun toplamlarını güncelle
+                standardLengths.forEach(length => {
+                    document.getElementById(`total${length}m`).textContent = columnTotals[length];
+                });
+                
+                customLengths.forEach(length => {
+                    document.getElementById(`total${length}m`).textContent = columnTotals[length];
+                });
+            }
+            
+            // Özel uzunluk ekle
+            function addCustomLength() {
+                const length = parseFloat(customLengthInput.value);
+                
+                if (isNaN(length) || length <= 0) {
+                    showNotification('Lütfen geçerli bir uzunluk giriniz.', 'error');
+                    return;
+                }
+                
+                if (standardLengths.includes(length) || customLengths.includes(length)) {
+                    showNotification('Bu uzunluk zaten ekli.', 'error');
+                    return;
+                }
+                
+                customLengths.push(length);
+                customLengths.sort((a, b) => a - b);
+                
+                // Yeni uzunluk için bütün çaplarda sayaç başlat
+                diameters.forEach(diameter => {
+                    if (!pipeCounts[diameter]) {
+                        pipeCounts[diameter] = {};
+                    }
+                    pipeCounts[diameter][length] = 0;
+                });
+                
+                renderTable();
+                customLengthInput.value = '';
+                showNotification(`${length} metre uzunluğundaki borular eklendi.`, 'success');
+            }
+            
+            // Bildirim göster
+            function showNotification(message, type) {
+                notification.textContent = message;
+                notification.className = 'mt-2 p-2 rounded-md';
+                
+                if (type === 'error') {
+                    notification.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-900', 'dark:text-red-200');
+                } else if (type === 'success') {
+                    notification.classList.add('bg-green-100', 'text-green-800', 'dark:bg-green-900', 'dark:text-green-200');
+                }
+                
+                notification.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    notification.classList.add('hidden');
+                }, 3000);
+            }
+            
+            // Tablo verilerini kopyala
+            function copyTableData() {
+                // CSV formatında veri oluştur
+                let csvContent = 'Çap (mm)';
+                
+                // Başlık satırı
+                [...standardLengths, ...customLengths].forEach(length => {
+                    csvContent += `,${length} metre`;
+                });
+                csvContent += '\n';
+                
+                // Veri satırları
+                diameters.forEach(diameter => {
+                    csvContent += `${diameter}`;
+                    
+                    [...standardLengths, ...customLengths].forEach(length => {
+                        csvContent += `,${pipeCounts[diameter][length] || 0}`;
+                    });
+                    
+                    csvContent += '\n';
+                });
+                
+                // Toplam satırı
+                csvContent += 'Toplam';
+                [...standardLengths, ...customLengths].forEach(length => {
+                    let columnTotal = 0;
+                    diameters.forEach(diameter => {
+                        columnTotal += pipeCounts[diameter][length] || 0;
+                    });
+                    csvContent += `,${columnTotal}`;
+                });
+                
+                csvContent += '\n\n';
+                csvContent += 'Özet Bilgiler\n';
+                csvContent += `Toplam Boru Adedi,${document.getElementById('totalCount').textContent}\n`;
+                csvContent += `Toplam Uzunluk (m),${document.getElementById('totalLength').textContent}\n`;
+                csvContent += `Özel Uzunluklu Borular,${document.getElementById('totalCustom').textContent}`;
+                
+                // Kopyalama alanını göster ve doldur
+                copyTextarea.value = csvContent;
+                copyArea.classList.remove('hidden');
+                copyTextarea.select();
+                
+                try {
+                    // Modern tarayıcılarda clipboard API kullan
+                    navigator.clipboard.writeText(csvContent)
+                        .then(() => {
+                            showNotification('Tablo verileri panoya kopyalandı.', 'success');
+                        })
+                        .catch(err => {
+                            showNotification('Verileri manuel olarak kopyalayın.', 'error');
+                            console.error('Clipboard yazma hatası:', err);
+                        });
+                } catch (e) {
+                    showNotification('Verileri manuel olarak kopyalayın.', 'error');
+                    console.error('Clipboard API desteklenmiyor:', e);
+                }
+            }
+            
+            // Sayımı sıfırla
+            function resetAll() {
+                initializeCounts();
+                renderTable();
+                showNotification('Tüm sayımlar sıfırlandı.', 'success');
+            }
+            
+            // Klavye kısayolları
+            function setupKeyboardShortcuts() {
+                document.addEventListener('keydown', function(event) {
+                    // Form elemanlarına odaklanılmışsa kısayolları devre dışı bırak
+                    if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+                        return;
+                    }
+                    
+                    const key = event.key.toLowerCase();
+                    
+                    // 3 metre borular için 1-8 tuşları
+                    if (key >= '1' && key <= '8') {
+                        const index = parseInt(key) - 1;
+                        if (index >= 0 && index < diameters.length) {
+                            incrementCount(diameters[index], 3);
+                        }
+                    }
+                    
+                    // 6 metre borular için q-i tuşları
+                    const sixMeterKeys = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i'];
+                    const keyIndex = sixMeterKeys.indexOf(key);
+                    if (keyIndex !== -1 && keyIndex < diameters.length) {
+                        incrementCount(diameters[keyIndex], 6);
+                    }
+                });
+            }
+            
+            // Olay dinleyicileri
+            document.getElementById('addCustomLength').addEventListener('click', addCustomLength);
+            document.getElementById('resetAll').addEventListener('click', resetAll);
+            document.getElementById('copyButton').addEventListener('click', copyTableData);
+            
+            // Enter tuşu ile özel uzunluk ekleme
+            customLengthInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    addCustomLength();
+                }
+            });
+            
+            // Hızlı sayım butonları için olay dinleyicileri
+            document.querySelectorAll('.quick-count-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const diameter = parseInt(this.dataset.diameter);
+                    const length = parseFloat(this.dataset.length);
+                    incrementCount(diameter, length);
+                    
+                    // Buton için geçici vurgu efekti
+                    this.classList.add('opacity-70');
+                    setTimeout(() => {
+                        this.classList.remove('opacity-70');
+                    }, 200);
+                });
+            });
+            
+            // Uygulamayı başlat
+            initializeCounts();
+            renderTable();
+            setupKeyboardShortcuts();
+        });
+    </script>
+</body>
+</html>
+"""
+
+# HTML içeriğini görüntüle
+display(HTML(html_code))
